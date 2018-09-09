@@ -1,6 +1,6 @@
 #spin-wheel
 
-![spin-wheel](https://github.com/sohamgreens/spin-wheel/raw/master/screen.png)
+![spin-wheel](https://github.com/harish282/spin-wheel/blob/master/screen.png)
 
 - 10 Sep 2018
 
