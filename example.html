@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Spin Wheel</title>
+  <script src="lib/jquery.min.js"></script>
+  <script src="src/jquery.spin-wheel.js"></script>
+  <script src="src/jquery.spin-wheel-skins.js"></script>
+</head>
+
+<body>
+  <div id="spinwheel"></div>
+  <button type="button" id="spin">Spin</button>
+  <script>
+    $(function () {
+      
+      SpinWheelSkins['myskin'] = $.extend({}, SpinWheelSkins.default);
+      //SpinWheelSkins['myskin'].innerCircle[0]['shadow'].type = 'outer';
+      SpinWheelSkins['myskin'].innerCircle[1]['color'] = null;
+      SpinWheelSkins['myskin'].innerCircle[1]['image'] = 'logo.png';
+      
+      $("#spinwheel").spinWheel({
+        slices: [
+          { label: 'Better Luck Next Time', chance: 30, prize: false },
+          { label: 'MobileFused Guide', chance: 30, prize: true },
+          { label: 'Movie Ticket', chance: 20, prize: true, style: { text: { color: '#ffffff', font: 'sans-serif', font_size: 10, shadow: { blur: 6, color: '#d011dd' }, stroke: { width: 1, color: '#d011dd' } } } },
+          { label: '10% Discount', chance: 8, prize: true },
+          { label: '50% Discount', chance: 2, prize: true },
+
+        ],
+        skin: 'myskin',
+        radius: 300,
+        tick_sound: 'tick.mp3',
+        onStop: function (idx, slice) {
+          console.log('winner is ', idx, slice);
+        }
+      });
+
+      $("#spin").click(function () {
+        $("#spinwheel").spinWheel().spin();
+      })
+    });
+  </script>
+</body>
+
+</html>
