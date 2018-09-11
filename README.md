@@ -19,7 +19,7 @@ Features Include:
 * Numerous text orientation, direction, size and colour options.
 * Priority wise prize stopping location.
 * Play sounds while the wheel is spinning including a "tick" sound.
-* Winwheel.js is free to use with an open source licence.
+* It is free to use with an open source licence.
 
 ## Example
 Check example.html included in source
