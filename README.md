@@ -38,39 +38,6 @@ like spin(seed, duration)
 Spin Wheel options 
 
 Check example.html included in source
-<script>
-    $(function () {
-      
-      $("#spinwheel").spinWheel({
-        slices: [
-          { label: 'Better Luck Next Time', chance: 30, prize: false },
-          { label: 'MobileFused Guide', chance: 30, prize: true },
-          { label: 'Movie Ticket', chance: 20, prize: true, style: { text: { color: '#ffffff', font: 'sans-serif', font_size: 10, shadow: { blur: 6, color: '#d011dd' }, stroke: { width: 1, color: '#d011dd' } } } },
-          { label: '10% Discount', chance: 8, prize: true },
-          { label: '50% Discount', chance: 2, prize: true },
-          { label: 'MobileFused Guide1', chance: 30, prize: true },
-          { label: 'MobileFused Guide2', chance: 30, prize: true },
-          { label: 'MobileFused Guide3', chance: 30, prize: true },
-          { label: 'MobileFused Guide4', chance: 30, prize: true },
-          { label: 'MobileFused Guide5', chance: 30, prize: true },
-          { label: 'MobileFused Guide6', chance: 30, prize: true },
-          { label: 'MobileFused Guide7', chance: 30, prize: true },
 
-        ],
-        skin: 'myskin',
-        radius: 300,
-        tick_sound: 'tick.mp3',
-        duration:3000,
-        speed:2,
-        onStop: function (idx, slice) {
-          console.log('winner is ', idx, slice);
-        }
-      });
-
-      $("#spin").click(function () {
-        $("#spinwheel").spinWheel().spin();
-      })
-    });
-  </script>
-##Guide
+## Guide
 TODO: I am not having time to write a guide for now, but in future will do so. 
