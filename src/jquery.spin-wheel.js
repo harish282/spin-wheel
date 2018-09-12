@@ -38,8 +38,8 @@ var SpinWheelSkins = {
         slices: [],
         skin: 'default',
         tick_sound: null,
-        easing: 'easeOutQuint',
-        speed: 3,
+        easing: 'linear',
+        speed: 2,
         duration: 3000,
     };
 
