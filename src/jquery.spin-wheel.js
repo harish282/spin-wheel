@@ -27,42 +27,8 @@ var SpinWheelSkins = {
             { color: "gradient:linear:#ececec:#d4d4d4", margin: 80, shadow: { type: 'inner' } },
             { color: "gradient:linear:#d2ff52:#7cbc0a", margin: 85, shadow: { type: 'outer' } }
         ],
-        arrow: { image: '<svg height="1024" width="640" xmlns="http://www.w3.org/2000/svg" style="fill:green;"><defs><filter id="f3" x="0" y="0" width="200%" height="200%"><feOffset result="offOut" in="SourceAlpha" dx="20" dy="20" /><feGaussianBlur result="blurOut" in="offOut" stdDeviation="10" /><feBlend in="SourceGraphic" in2="blurOut" mode="normal" />   </filter></defs><path  filter="url(#f3)" d="M320 0C143.219 0 0 143.21900000000005 0 320s320 704 320 704 320-527.219 320-704S496.75 0 320 0zM320 448c-70.656 0-128-57.344-128-128s57.344-128 128-128c70.625 0 128 57.344 128 128S390.625 448 320 448z"/><ellipse stroke="#000" ry="128.999996" rx="128" id="svg_2" cy="319.999996" cx="319.5" stroke-width="1.5"  style="fill:#E91E63;"/></svg>', color: ['#bee552', '#52c0e5'] },
+        arrow: { image: '<svg height="1024" width="650" xmlns="http://www.w3.org/2000/svg" style="fill:green;"><defs><filter id="f3" x="0" y="0" width="200%" height="200%"><feOffset result="offOut" in="SourceAlpha" dx="20" dy="20" /><feGaussianBlur result="blurOut" in="offOut" stdDeviation="10" /><feBlend in="SourceGraphic" in2="blurOut" mode="normal" />   </filter></defs><path  filter="url(#f3)" d="M320 0C143.219 0 0 143.21900000000005 0 320s320 704 320 704 320-527.219 320-704S496.75 0 320 0zM320 448c-70.656 0-128-57.344-128-128s57.344-128 128-128c70.625 0 128 57.344 128 128S390.625 448 320 448z"/><ellipse stroke="#000" ry="128.999996" rx="128" id="svg_2" cy="319.999996" cx="319.5" stroke-width="1.5"  style="fill:#E91E63;"/></svg>', color: ['#bee552', '#52c0e5'] },
     }
-};
-
-// https://gist.github.com/gre/1650294
-/** only considering the t value for the range [0, 1] => [0, 1] */
-var SpinWheelEasing = {
-    // no easing, no acceleration
-    linear: function (t) { return t },
-    // accelerating from zero velocity
-    easeInQuad: function (t) { return t * t },
-    // decelerating to zero velocity
-    easeOutQuad: function (t) { return t * (2 - t) },
-    // acceleration until halfway, then deceleration
-    easeInOutQuad: function (t) { return t < .5 ? 2 * t * t : -1 + (4 - 2 * t) * t },
-    // accelerating from zero velocity 
-    easeInCubic: function (t) { return t * t * t },
-    // decelerating to zero velocity 
-    easeOutCubic: function (t) { return (--t) * t * t + 1 },
-    // acceleration until halfway, then deceleration 
-    easeInOutCubic: function (t) { return t < .5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1 },
-    // accelerating from zero velocity 
-    easeInQuart: function (t) { return t * t * t * t },
-    // decelerating to zero velocity 
-    easeOutQuart: function (t) { return 1 - (--t) * t * t * t },
-    // acceleration until halfway, then deceleration
-    easeInOutQuart: function (t) { return t < .5 ? 8 * t * t * t * t : 1 - 8 * (--t) * t * t * t },
-    // accelerating from zero velocity
-    easeInQuint: function (t) { return t * t * t * t * t },
-    // decelerating to zero velocity
-    easeOutQuint: function (t) { return 1 + (--t) * t * t * t * t },
-    // acceleration until halfway, then deceleration 
-    easeInOutQuint: function (t) { return t < .5 ? 16 * t * t * t * t * t : 1 + 16 * (--t) * t * t * t * t },
-    easeInSin: function (t) { return 1 + Math.sin(Math.PI / 2 * t - Math.PI / 2); },
-    easeOutSin: function (t) { return Math.sin(Math.PI / 2 * t); },
-    easeInOutSin: function (t) { return (1 + Math.sin(Math.PI * t - Math.PI / 2)) / 2; }
 };
 
 (function ($) {
@@ -72,8 +38,9 @@ var SpinWheelEasing = {
         slices: [],
         skin: 'default',
         tick_sound: null,
-        easing: SpinWheelEasing.easeInQuint,
-        speed: 50
+        easing: 'easeOutQuint',
+        speed: 3,
+        duration: 3000,
     };
 
     var SpinWheel = function (element, options) {
@@ -86,12 +53,10 @@ var SpinWheelEasing = {
         this.scale = 1;
         this.diameter = this.radius * 2;
 
-        this.speed = this.options.speed;
+        this.speed = this.options.speed >=1 ? this.options.speed:1;
         this.start_angle = 0;
-        this.start_time = 0;
-        this.velocity = 0;
-        this.duration = 5000;// in miliseconds
-        this.stopduration = 0;
+        this.duration = this.options.duration;// in miliseconds
+        this.rotating = false;
 
         this.rotate_arrow = 0;
         this.images = [];
@@ -99,6 +64,7 @@ var SpinWheelEasing = {
         this.canvas = null;
         this.ctx = null;
         this.arrow = null;
+        this.arrow_angle = 270; //on top
         this.audio = null;
         this.winner = -1;
         this.init();
@@ -116,7 +82,7 @@ var SpinWheelEasing = {
             this._prepareArrow()
             this.render();
 
-      
+
             //this.spin();
         },
 
@@ -189,8 +155,8 @@ var SpinWheelEasing = {
         },
 
         spin: function (speed, duration) {
-            if(speed) this.speed = speed;
-            if(duration) this.duration = duration;
+            if (speed) this.speed = speed;
+            if (duration) this.duration = duration;
             this.start_time = Date.now();
             this.velocity = 0;
             this.start_angle = 0;
@@ -236,11 +202,11 @@ var SpinWheelEasing = {
 
         },
 
-        _calcChance: function(){
+        _calcChance: function () {
             var chances = [];
             var idx = 0;
-            for(var s of this.options.slices){
-                for(var i=0, l=s.chance ? s.chance:1; i<l;i++){
+            for (var s of this.options.slices) {
+                for (var i = 0, l = s.chance ? s.chance : 1; i < l; i++) {
                     chances.push(idx);
                 }
                 idx++;
@@ -250,33 +216,27 @@ var SpinWheelEasing = {
         },
 
         _rotate: function () {
-            //this.velocity += .0025;
-            var d = Date.now() - this.start_time;
-            if (d <= this.duration) {
-                this.velocity = this.options.easing(1 - (Date.now() - this.start_time) / this.duration);
-                this.velocity = Math.max(this.velocity, 0.010);
-            } else if(this.velocity > 0 && this.stopduration > 0){
-                this.velocity -= this.stopduration;
-                //console.log(this.stopduration, this.velocity);
-            } else if(this.velocity > 0) {
-                this.stopduration = -2;
-            }
+            this.rotating = true;
+            var self = this;
+            var sa = 360/this.options.slices.length;
+            var angle = this.arrow_angle + (360 * this.speed) - ( (this.winner+1) * sa ) + (Math.random()*sa);
+            var args = $.speed(this.duration, this.easing, function(){
+                self.rotating = false;
+                self.render();
+                self._onStop();
+            });
+            args.step = function (now, fx) {
+                self.start_angle = self._toRadian(now);
+                self.render();
+                //console.log('rotate(' + now + 'deg)');
+            };
 
-            //console.log(this.speed * this.velocity);
-            this.start_angle += this._toRadian(this.speed * this.velocity);
-            this.render();
-
-            if (this.velocity > 0) {
-                requestAnimationFrame(this._rotate.bind(this));
-            } else {
-                this._onStop();
-                this.stopduration = 0;
-            }
+            $({ deg: 0 }).animate({ deg: angle }, args);
         },
 
-        _parseColor: function (color, center, radius, is_circle=false) {
+        _parseColor: function (color, center, radius, is_circle = false) {
             //var center = 0, radius = this.radius;
-            if(!is_circle) is_circle = false;
+            if (!is_circle) is_circle = false;
             var start = is_circle ? -radius : center;
             //console.info(radius);
             //var diameter = 2 * radius;
@@ -314,13 +274,13 @@ var SpinWheelEasing = {
                 var info_arr = color.split(":");
 
                 //if (info_arr[2].match(/^distribute/) || info_arr.length-2 > 2) start = -radius;
-                
+
                 if (info_arr[1] == "radial") {
                     var grd = this.ctx.createRadialGradient(center, center, 0, center, center, radius);
                 } else if (info_arr[1] == "linear-v") {
                     var grd = this.ctx.createLinearGradient(start, 0, radius, 0);
                 } else if (info_arr[1] == "linear-h") {
-                    var grd = this.ctx.createLinearGradient(0, start, 0, radius);                    
+                    var grd = this.ctx.createLinearGradient(0, start, 0, radius);
                 } else {
                     var grd = this.ctx.createLinearGradient(start, start, radius, radius);
                 }
@@ -349,7 +309,7 @@ var SpinWheelEasing = {
 
         _drawCircle: function (props) {
             this.ctx.save();
-            
+
             var radius = this.radius;
             var center = 0;
 
@@ -367,11 +327,11 @@ var SpinWheelEasing = {
             var offsetY = Math.sin(mid_angle) * offset;
 
             this.ctx.beginPath();
-            this.ctx.translate(this.radius, this.radius)  ;
-            if(props.rotate) {
+            this.ctx.translate(this.radius, this.radius);
+            if (props.rotate) {
                 this.ctx.rotate(props.rotate);
             }
-            
+
             //this.ctx.moveTo(center + offsetX, center + offsetY);
             this.ctx.arc(center + offsetX, center + offsetY, radius, start_angle, start_angle + angle);
             if (offset > 0) {
@@ -385,15 +345,15 @@ var SpinWheelEasing = {
                 this.ctx.shadowOffsetX = (props.shadow.offsetX ? props.shadow.offsetX : 0) * this.scale;
                 this.ctx.shadowOffsetY = (props.shadow.offsetY ? props.shadow.offsetY : 0) * this.scale;
             }
-            
+
             if (props.color) {
                 this.ctx.fillStyle = this._parseColor(props.color, center + offsetX, radius, angle == this._toRadian(360));
                 this.ctx.fill();
             }
 
-            if(props.image) {
-                var self= this;
-                if(!props.patternImage) {
+            if (props.image) {
+                var self = this;
+                if (!props.patternImage) {
                     var img = $('<img/>', {
                         load: function () {
                             props.patternImage = img[0];
@@ -407,12 +367,12 @@ var SpinWheelEasing = {
                 } else {
                     //this.ctx.clip();
                     var r = radius * 0.9;
-                    var pattern = this.ctx.drawImage(props.patternImage, -r, -r, 2*r, 2*r);
+                    var pattern = this.ctx.drawImage(props.patternImage, -r, -r, 2 * r, 2 * r);
                 }
-            }else if(props.pattern) {
-                var self= this;
+            } else if (props.pattern) {
+                var self = this;
                 //console.log(props.patternImage);
-                if(!props.patternImage) {
+                if (!props.patternImage) {
                     var img = $('<img/>', {
                         load: function () {
                             props.patternImage = img[0];
@@ -550,7 +510,7 @@ var SpinWheelEasing = {
                 var slice = slices[i];
                 var text = slice.label;
 
-                if(!slice.props){
+                if (!slice.props) {
                     slice.props = $.extend({}, props, slice.style || {});
                 }
                 var params = $.extend(slice.props, { start_angle: 0, angle: arc, rotate: sa + arc * i }); //sa + arc * i
@@ -559,27 +519,22 @@ var SpinWheelEasing = {
                     clridx++;
                     if (clridx >= props.bgcolors.length) clridx = 0;
                 }
-                if(slice.style && slice.style.color){
+                if (slice.style && slice.style.color) {
                     params['pattern'] = null;
                     params['color'] = slice.style.color;
                 }
-                $.extend(params.text , {text: text, radius: this.radius * 0.80 - props.margin});
+                $.extend(params.text, { text: text, radius: this.radius * 0.80 - props.margin });
                 //console.log(params);
                 //params["text"] = { text: text, style: slice.text ? slice.text:props.text, radius: this.radius * 0.80 - props.margin };
-                var slicea = (sa + arc * (i+1)) % this._toRadian(360);
+                var slicea = (sa + arc * (i + 1)) % this._toRadian(360);
                 var da = this.velocity * this._toRadian(30);
-                if (slicea + da >= this._toRadian(275) && slicea - da <= this._toRadian(275) && this.rotate_arrow == 0) {
+                if (slicea >= this._toRadian(this.arrow_angle) && slicea <= this._toRadian(this.arrow_angle+10) && this.rotate_arrow == 0 && this.rotating) {
                     this._onTick();
-                    if(this.stopduration == -2 && i == this.winner){
-                        var anims = Math.floor(Math.random() * (360/(slices.length*15))) + 0.5;//  ((Math.random() * 2) / this.options.slices.length);
-                        this.stopduration = (this.velocity / (60 * anims));
-                        //console.log(this.stopduration, this.winner, anims);
-                    }
                 }
-                //console.log(slicea + da, this._toRadian(275));
+                //console.log(slicea, this._toRadian(this.arrow_angle));
                 this._drawCircle(params);
                 this.ctx.save();
-                
+
                 this.ctx.restore();
                 //this._drawText(text, sa + arc * i, arc, props.text);
             }
@@ -590,14 +545,14 @@ var SpinWheelEasing = {
             if (this.arrow) {
                 this.ctx.save();
                 this.ctx.beginPath();
-                this.ctx.translate(this.radius, 5);
-                if (this.rotate_arrow > 0) {
+                this.ctx.translate(this.radius - this.arrow.width/2, 5);
+                if (this.rotate_arrow > 0 && this.rotating) {
                     this.ctx.rotate(-this._toRadian(this.rotate_arrow));
-                    this.rotate_arrow += 10;
-                    if(this.rotate_arrow >= 50){
+                    this.rotate_arrow += 5;
+                    if (this.rotate_arrow >= 50) {
                         this.rotate_arrow = 0;
                     }
-                }
+                } 
                 this.ctx.drawImage(this.arrow, 0, -5);
                 this.ctx.restore();
             }
@@ -626,11 +581,11 @@ var SpinWheelEasing = {
             var svg = $.parseXML(svg);
             var svge = $(svg).find('svg');
             var svgh = svge.attr('height');
-            var svhw = svge.attr('width');
+            var svgw = svge.attr('width');
             var h = 25;
             var sh = h / svgh;
-            var w = svhw / sh;
-            var sw = svhw / w;
+            var w = svgw * sh;
+            var sw = w / svgw;
             var transformTag = $(document.createElementNS('http://www.w3.org/2000/svg', 'g'))
                 .attr('transform', 'scale(' + sw + ', ' + sh + ')');
 
@@ -673,10 +628,10 @@ var SpinWheelEasing = {
 
     /** if not requestanimationframe found  */
     window.requestAnimationFrame = window.requestAnimationFrame
-    || window.mozRequestAnimationFrame
-    || window.webkitRequestAnimationFrame
-    || window.msRequestAnimationFrame
-    || function(f){return setTimeout(f, 1000/60)};
+        || window.mozRequestAnimationFrame
+        || window.webkitRequestAnimationFrame
+        || window.msRequestAnimationFrame
+        || function (f) { return setTimeout(f, 1000 / 60) };
 
 }(jQuery));
 
